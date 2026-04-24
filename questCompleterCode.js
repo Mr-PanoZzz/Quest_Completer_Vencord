@@ -31,24 +31,22 @@ if(quests.length === 0) {
 		let secondsDone = quest.userStatus?.progress?.[taskName]?.value ?? 0
 
 		if(taskName === "WATCH_VIDEO" || taskName === "WATCH_VIDEO_ON_MOBILE") {
-			const maxFuture = 10, speed = 7, interval = 1
+			const speed = 7
 			const enrolledAt = new Date(quest.userStatus.enrolledAt).getTime()
 			let completed = false
 			let fn = async () => {			
 				while(true) {
-					const maxAllowed = Math.floor((Date.now() - enrolledAt)/1000) + maxFuture
-					const diff = maxAllowed - secondsDone
+					const remaining = Math.min(speed, secondsNeeded - secondsDone)
+					await new Promise(resolve => setTimeout(resolve, remaining * 1000))
+
 					const timestamp = secondsDone + speed
-					if(diff >= speed) {
-						const res = await api.post({url: `/quests/${quest.id}/video-progress`, body: {timestamp: Math.min(secondsNeeded, timestamp + Math.random())}})
-						completed = res.body.completed_at != null
-						secondsDone = Math.min(secondsNeeded, timestamp)
-					}
-					
+					const res = await api.post({url: `/quests/${quest.id}/video-progress`, body: {timestamp: Math.min(secondsNeeded, timestamp + Math.random())}})
+					completed = res.body.completed_at != null
+					secondsDone = Math.min(secondsNeeded, timestamp)
+
 					if(timestamp >= secondsNeeded) {
 						break
 					}
-					await new Promise(resolve => setTimeout(resolve, interval * 1000))
 				}
 				if(!completed) {
 					await api.post({url: `/quests/${quest.id}/video-progress`, body: {timestamp: secondsNeeded}})
