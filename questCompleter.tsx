@@ -19,7 +19,7 @@ const QuestsStore = findStoreLazy("QuestStore");
 export default definePlugin({
     name: "QuestCompleter",
     description: "Completes Quests (uses Aamia's quest script)",
-    authors: [{ name: "Mr_PanoZzz", id: 939129546551210056n }],
+    authors: [{ name: "Mr_PanoZzz", id: 1230932285067366400n }],
     patches: [
         {
             find: "useMemo(()=>({sortMethod:",
