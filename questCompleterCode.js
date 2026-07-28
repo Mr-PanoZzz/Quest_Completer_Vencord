@@ -22,12 +22,12 @@ if(quests.length === 0) {
 
 		const pid = Math.floor(Math.random() * 30000) + 1000
 		
-		const applicationId = quest.config.application.id
-		const applicationName = quest.config.application.name
 		const questName = quest.config.messages.questName
 		const taskConfig = quest.config.taskConfig ?? quest.config.taskConfigV2
 		const taskName = supportedTasks.find(x => taskConfig.tasks[x] != null)
-		const secondsNeeded = taskConfig.tasks[taskName].target
+		const taskData = taskConfig.tasks[taskName]
+		const applicationId = quest.config.application?.id ?? taskData.applications[0].id
+		const secondsNeeded = taskData.target
 		let secondsDone = quest.userStatus?.progress?.[taskName]?.value ?? 0
 
 		if(taskName === "WATCH_VIDEO" || taskName === "WATCH_VIDEO_ON_MOBILE") {
@@ -102,7 +102,7 @@ if(quests.length === 0) {
 					}
 					FluxDispatcher.subscribe("QUESTS_SEND_HEARTBEAT_SUCCESS", fn)
 					
-					console.log(`Spoofed your game to ${applicationName}. Wait for ${Math.ceil((secondsNeeded - secondsDone) / 60)} more minutes.`)
+					console.log(`Spoofed your game to ${appData.name}. Wait for ${Math.ceil((secondsNeeded - secondsDone) / 60)} more minutes.`)
 				})
 			}
 		} else if(taskName === "STREAM_ON_DESKTOP") {
@@ -131,7 +131,7 @@ if(quests.length === 0) {
 				}
 				FluxDispatcher.subscribe("QUESTS_SEND_HEARTBEAT_SUCCESS", fn)
 				
-				console.log(`Spoofed your stream to ${applicationName}. Stream any window in vc for ${Math.ceil((secondsNeeded - secondsDone) / 60)} more minutes.`)
+				console.log(`Spoofed your stream to the target game. Stream any window in vc for ${Math.ceil((secondsNeeded - secondsDone) / 60)} more minutes.`)
 				console.log("Remember that you need at least 1 other person to be in the vc!")
 			}
 		} else if(taskName === "PLAY_ACTIVITY") {
