@@ -8,10 +8,9 @@ import { Notices } from "@api/index";
 import { BaseText } from "@components/BaseText";
 import { Button } from "@components/Button";
 import { Link } from "@components/Link";
-import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findStoreLazy } from "@webpack";
-import { Alerts, Toasts } from "@webpack/common";
+import { Alerts, showToast } from "@webpack/common";
 
 const questScript = "https://raw.githubusercontent.com/Mr-PanoZzz/Quest_Completer_Vencord/refs/heads/main/questCompleterCode.js";
 const QuestsStore = findStoreLazy("QuestStore");
@@ -19,7 +18,7 @@ const QuestsStore = findStoreLazy("QuestStore");
 export default definePlugin({
     name: "QuestCompleter",
     description: "Completes Quests (uses Aamia's quest script)",
-    authors: [{ name: "Mr_PanoZzz", id: 1230932285067366400n }],
+    authors: [{ name: "Mr_PanoZzz", id: 939129546551210056n }],
     patches: [
         {
             find: "useMemo(()=>({sortMethod:",
@@ -31,11 +30,7 @@ export default definePlugin({
     ],
     async completeQuest() {
         const possibleQuest = QuestsStore.quests.values().find(q => q.userStatus?.enrolledAt && !q.userStatus?.completedAt && new Date(q.config.expiresAt).getTime() > Date.now() && q.id !== "1412491570820812933");
-        if (!possibleQuest) return Toasts.show({
-            type: Toasts.Type.FAILURE,
-            message: "You don't have any uncompleted quests",
-            id: Toasts.genId()
-        });
+        if (!possibleQuest) return showToast("You don't have any uncompleted quests", 2);
 
         Alerts.show({
             title: "Confirm",
@@ -52,7 +47,6 @@ export default definePlugin({
                     const scriptContent = await response.text();
                     if (!scriptContent) throw new Error("Empty script received");
 
-                    // For raw .js files, use content directly without markdown parsing
                     const wrappedScript = new Function("console", `return (() => { ${scriptContent} })();`);
                     
                     const console = {
@@ -60,22 +54,14 @@ export default definePlugin({
                             if (t === "Quest completed!") {
                                 return Notices.showNotice("Quest completed!", "OK", () => Notices.popNotice());
                             }
-                            Toasts.show({
-                                type: Toasts.Type.MESSAGE,
-                                message: t,
-                                id: Toasts.genId()
-                            });
+                            showToast(t, 0);
                             window.console.log(t);
                         }
                     };
                     
                     wrappedScript(console);
                 } catch (err) {
-                    Toasts.show({
-                        type: Toasts.Type.FAILURE,
-                        message: `Failed to execute quest script: ${err}`,
-                        id: Toasts.genId()
-                    });
+                    showToast(`Failed to execute quest script: ${err}`, 2);
                     console.error("[QuestCompleter] Error:", err);
                 }
             }
